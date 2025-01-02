@@ -72,6 +72,8 @@ class LimitedIterableStackTest {
 		assertEquals(1, stack.previous());
 		assertEquals(2, stack.getCursor());
 		assertEquals(0, stack.previous());
+		assertEquals(null, stack.previous());
+		assertEquals(0, stack.getCursor());
 		assertEquals(2, stack.previous());
 		assertEquals(1, stack.getCursor());
 		stack.setCapacity(0);
@@ -91,6 +93,8 @@ class LimitedIterableStackTest {
 		assertEquals(2, stack.getCursor());
 		assertEquals(2, stack.next());
 		assertEquals(1, stack.getCursor());
+		assertEquals(null, stack.next());
+		assertEquals(0, stack.getCursor());
 		assertEquals(0, stack.next());
 		assertEquals(3, stack.getCursor());
 		stack.setCapacity(0);

@@ -45,12 +45,9 @@ public class LimitedIterableStack<T> extends LinkedList<T> {
 
 	public T previous() {
 		cursor++;
-		if (isEmpty()) {
+		if (isEmpty() || size() - cursor < 0) {
 			cursor = 0;
 			return null;
-		} else if (size() - cursor < 0) {
-			cursor = 1;
-			return getLast();
 		}
 		return get(size() - cursor);
 	}
@@ -60,7 +57,9 @@ public class LimitedIterableStack<T> extends LinkedList<T> {
 		if (isEmpty()) {
 			cursor = 0;
 			return null;
-		} else if (cursor <= 0) {
+		} else if (cursor == 0) {
+			return null;
+		} else if (cursor < 0) {
 			cursor = size();
 			return getFirst();
 		}
