@@ -120,5 +120,9 @@ public class LimitedIterableStack<T> extends LinkedList<T> {
 	public T getCursorValue() {
 		return get(size() - cursor -1);
 	}
+	
+	public void resetCursor() {
+		cursor = 0;
+	}
 
 }

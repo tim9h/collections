@@ -111,7 +111,18 @@ class LimitedIterableStackTest {
 		stack.previous();
 		stack.setCapacity(3);
 		assertEquals(0, stack.getCursor());
-		
+	}
+	
+	@Test
+	void testResetCursor() {
+		var stack = new LimitedIterableStack<Integer>(5);
+		for (var i = 0; i < 5; i++) {
+			stack.push(i);
+		}
+		stack.previous();
+		stack.previous();
+		stack.resetCursor();
+		assertEquals(0, stack.getCursor());
 	}
 
 }
