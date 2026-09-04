@@ -14,19 +14,32 @@ on:
   pull_request:
     branches: [ "master" ]
 
+# Grants permissions to write to GitHub Packages
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 25
+
+    - name: Set up JDK 26
       uses: actions/setup-java@v4
       with:
-        java-version: '25'
+        java-version: '26'
         distribution: 'temurin'
         cache: maven
+        server-id: github
+
     - name: Build with Maven
+      if: github.event_name == 'pull_request'
       run: mvn -B package --file pom.xml
-      
+
+    - name: Publish to GitHub Packages
+      if: github.event_name == 'push'
+      run: mvn -B deploy --file pom.xml -DskipTests=false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -29,10 +29,18 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.14.1</version>
 				<configuration>
-					<release>25</release>
+					<release>26</release>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/tim9h/collections</url>
+		</repository>
+	</distributionManagement>
 
 </project>
