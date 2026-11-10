@@ -1,13 +1,15 @@
 package dev.tim9h.collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 class LimitedIterableStackTest {
-	
+
 	@Test
 	void testCapacity() {
 		var capacity = 5;
@@ -67,19 +69,16 @@ class LimitedIterableStackTest {
 			stack.push(i);
 		}
 		assertEquals(0, stack.getCursor());
-		assertEquals(2, stack.previous());
-		assertEquals(1, stack.getCursor());
 		assertEquals(1, stack.previous());
-		assertEquals(2, stack.getCursor());
-		assertEquals(0, stack.previous());
-		assertEquals(null, stack.previous());
-		assertEquals(0, stack.getCursor());
-		assertEquals(2, stack.previous());
 		assertEquals(1, stack.getCursor());
+		assertEquals(0, stack.previous());
+		assertEquals(2, stack.getCursor());
+		assertNull(stack.previous());
+		assertEquals(2, stack.getCursor());
 		stack.setCapacity(0);
 		assertNull(stack.previous());
 	}
-	
+
 	@Test
 	void testNext() {
 		var stack = new LimitedIterableStack<Integer>(3);
@@ -87,20 +86,15 @@ class LimitedIterableStackTest {
 			stack.push(i);
 		}
 		assertEquals(0, stack.getCursor());
-		assertEquals(0, stack.next());
-		assertEquals(3, stack.getCursor());
-		assertEquals(1, stack.next());
-		assertEquals(2, stack.getCursor());
-		assertEquals(2, stack.next());
-		assertEquals(1, stack.getCursor());
-		assertEquals(null, stack.next());
+		assertNull(stack.next());
 		assertEquals(0, stack.getCursor());
-		assertEquals(0, stack.next());
-		assertEquals(3, stack.getCursor());
+		stack.previous();
+		assertEquals(2, stack.next());
+		assertEquals(0, stack.getCursor());
 		stack.setCapacity(0);
 		assertNull(stack.next());
 	}
-	
+
 	@Test
 	void testCapacityCursorMovement() {
 		var stack = new LimitedIterableStack<Integer>(5);
@@ -110,13 +104,13 @@ class LimitedIterableStackTest {
 		stack.previous();
 		stack.previous();
 		assertEquals(2, stack.getCursor());
+		assertEquals(2, stack.getCursorValue());
 		stack.setCapacity(4);
-		stack.previous();
-		stack.previous();
+		assertEquals(2, stack.getCursorValue());
 		stack.setCapacity(3);
-		assertEquals(0, stack.getCursor());
+		assertEquals(2, stack.getCursorValue());
 	}
-	
+
 	@Test
 	void testResetCursor() {
 		var stack = new LimitedIterableStack<Integer>(5);
@@ -127,6 +121,47 @@ class LimitedIterableStackTest {
 		stack.previous();
 		stack.resetCursor();
 		assertEquals(0, stack.getCursor());
+	}
+
+	@Test
+	void testCursorValueAndPopRemainValid() {
+		var stack = new LimitedIterableStack<Integer>(3);
+		stack.push(1);
+		stack.push(2);
+		stack.push(3);
+		assertEquals(3, stack.getCursorValue());
+		assertEquals(2, stack.previous());
+		assertEquals(2, stack.getCursorValue());
+		assertEquals(3, stack.pop());
+		assertEquals(0, stack.getCursor());
+		assertEquals(2, stack.getCursorValue());
+		assertNull(new LimitedIterableStack<Integer>(2).getCursorValue());
+	}
+
+	@Test
+	void testCapacityCannotBeBypassedAndIteratorIsReadOnly() {
+		var stack = new LimitedIterableStack<Integer>(2);
+		stack.push(1);
+		stack.push(2);
+		stack.push(3);
+		assertEquals(2, stack.size());
+		assertEquals(2, stack.getFirst());
+		var iterator = stack.iterator();
+		assertEquals(2, iterator.next());
+		assertThrows(UnsupportedOperationException.class, iterator::remove);
+		assertEquals(2, stack.size());
+	}
+
+	@Test
+	void testNullValuesAndEquality() {
+		var stack = new LimitedIterableStack<String>(2);
+		stack.push(null);
+		assertEquals("[(null)]", stack.toString());
+		var equalStack = new LimitedIterableStack<String>(2);
+		equalStack.push(null);
+		assertEquals(stack, equalStack);
+		assertEquals(stack.hashCode(), equalStack.hashCode());
+		assertNotEquals(stack, new LimitedIterableStack<String>(3));
 	}
 
 }
