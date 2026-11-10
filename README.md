@@ -1,6 +1,6 @@
 # collections
 
-A small Java collections library published as `dev.tim9h:collections`. The repository currently contains only one collection: `LimitedIterableStack<T>`.
+A small Java collections library published as `dev.tim9h:collections`.
 
 ## LimitedIterableStack
 
