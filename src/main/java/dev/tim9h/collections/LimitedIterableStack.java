@@ -1,69 +1,63 @@
 package dev.tim9h.collections;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class LimitedIterableStack<T> extends LinkedList<T> {
+public class LimitedIterableStack<T> implements Iterable<T> {
 
-	private static final long serialVersionUID = 1L;
+	private final ArrayList<T> elements = new ArrayList<>();
 
 	private int capacity;
 
 	private int cursor = 0;
 
 	public LimitedIterableStack(int capacity) {
-		this.capacity = capacity;
+		this.capacity = Math.max(0, capacity);
 	}
 
-	@Override
 	public void push(T value) {
-		add(value);
-		if (size() > capacity) {
-			removeFirst();
+		if (capacity == 0) {
+			return;
 		}
+		if (elements.size() == capacity) {
+			elements.removeFirst();
+		}
+		elements.add(value);
 		cursor = 0;
 	}
 
-	@Override
 	public T pop() {
-		if (isEmpty()) {
+		if (elements.isEmpty()) {
 			return null;
 		}
-		var value = getLast();
-		removeLast();
+		var value = elements.removeLast();
+		if (cursor > 0 && !elements.isEmpty()) {
+			cursor--;
+		}
+		cursor = Math.clamp(cursor, 0, Math.max(0, elements.size() - 1));
 		return value;
 	}
 
-	@Override
 	public T peek() {
-		if (isEmpty()) {
-			return null;
-		}
-		return getLast();
+		return elements.isEmpty() ? null : elements.getLast();
 	}
 
 	public T previous() {
-		cursor++;
-		if (isEmpty() || size() - cursor < 0) {
-			cursor = 0;
+		if (cursor + 1 >= elements.size()) {
 			return null;
 		}
-		return get(size() - cursor);
+		cursor++;
+		return getCursorValue();
 	}
 
 	public T next() {
-		cursor--;
-		if (isEmpty()) {
-			cursor = 0;
+		if (cursor == 0) {
 			return null;
-		} else if (cursor == 0) {
-			return null;
-		} else if (cursor < 0) {
-			cursor = size();
-			return getFirst();
 		}
-		return get(size() - cursor);
+		cursor--;
+		return getCursorValue();
 	}
 
 	public int getCapacity() {
@@ -71,55 +65,78 @@ public class LimitedIterableStack<T> extends LinkedList<T> {
 	}
 
 	public void setCapacity(int capacity) {
-		this.capacity = capacity;
-		if (capacity < size() && capacity > 0) {
-			removeRange(0, size() - capacity);
-			if (cursor > capacity) {
-				cursor = 0;
-			}
-		} else if (capacity <= 0) {
-			clear();
-			this.capacity = 0;
+		this.capacity = Math.max(0, capacity);
+		if (this.capacity < elements.size()) {
+			var excess = elements.size() - this.capacity;
+			elements.subList(0, excess).clear();
+			cursor = Math.clamp(cursor, 0, Math.max(0, elements.size() - 1));
 		}
 	}
 
-	@Override
 	public String toString() {
-		return isEmpty() ? "[empty]" : "[" + stream().map(t -> {
-			if (cursor > 0 && t == get(size() - cursor)) {
-				return "(" + t.toString() + ")";
-			} else {
-				return t.toString();
+		if (elements.isEmpty()) {
+			return "[empty]";
+		}
+		var result = new StringBuilder("[");
+		for (var index = 0; index < elements.size(); index++) {
+			if (index > 0) {
+				result.append(", ");
 			}
-		}).collect(Collectors.joining(", ")) + "]";
+			var value = String.valueOf(elements.get(index));
+			if (index == elements.size() - 1 - cursor) {
+				result.append('(').append(value).append(')');
+			} else {
+				result.append(value);
+			}
+		}
+		return result.append(']').toString();
 	}
 
-	@Override
 	public int hashCode() {
-		var result = super.hashCode();
-		return 31 * result + Objects.hash(capacity, cursor);
+		return Objects.hash(elements, capacity, cursor);
+	}
+
+	public boolean equals(Object obj) {
+		return this == obj || obj instanceof LimitedIterableStack<?> other && capacity == other.capacity
+				&& cursor == other.cursor && elements.equals(other.elements);
+	}
+
+	public int size() {
+		return elements.size();
+	}
+
+	public boolean isEmpty() {
+		return elements.isEmpty();
+	}
+
+	public T get(int index) {
+		return elements.get(index);
+	}
+
+	public T getFirst() {
+		return elements.getFirst();
+	}
+
+	public T getLast() {
+		return elements.getLast();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		var other = (LimitedIterableStack<?>) obj;
-		return capacity == other.capacity && cursor == other.cursor;
+	public Iterator<T> iterator() {
+		return Collections.unmodifiableList(new ArrayList<>(elements)).iterator();
 	}
-	
+
 	public int getCursor() {
 		return cursor;
 	}
-	
+
 	public T getCursorValue() {
-		return get(size() - cursor -1);
+		if (elements.isEmpty()) {
+			return null;
+		}
+		return elements.get(elements.size() - 1 - cursor);
 	}
-	
+
 	public void resetCursor() {
 		cursor = 0;
 	}
