@@ -109,6 +109,11 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 		return elements.isEmpty();
 	}
 
+	public void clear() {
+		elements.clear();
+		cursor = 0;
+	}
+
 	public T get(int index) {
 		return elements.get(index);
 	}
