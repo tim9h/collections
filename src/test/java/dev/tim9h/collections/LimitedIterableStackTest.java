@@ -124,6 +124,24 @@ class LimitedIterableStackTest {
 	}
 
 	@Test
+	void testClear() {
+		var stack = new LimitedIterableStack<Integer>(5);
+		stack.push(1);
+		stack.push(2);
+		stack.previous();
+
+		stack.clear();
+
+		assertTrue(stack.isEmpty());
+		assertEquals(0, stack.size());
+		assertEquals(0, stack.getCursor());
+		assertNull(stack.getCursorValue());
+		assertEquals(5, stack.getCapacity());
+		stack.push(3);
+		assertEquals(3, stack.peek());
+	}
+
+	@Test
 	void testCursorValueAndPopRemainValid() {
 		var stack = new LimitedIterableStack<Integer>(3);
 		stack.push(1);
