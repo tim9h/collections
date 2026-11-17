@@ -6,7 +6,7 @@ A small Java collections library published as `dev.tim9h:collections`.
 
 `LimitedIterableStack<T>` is a stack with a configurable capacity and a cursor for browsing stored values. The newest value is at the top of the stack. `push` adds to the top and, when the positive capacity is reached, discards the oldest value. A zero capacity stores no values. `pop` and `peek` return `null` when the stack is empty.
 
-The cursor starts on the top value (offset `0`). Calling `previous()` moves toward older values, and `next()` moves back toward newer values; either returns `null` when there is no value in that direction. `getCursorValue()` returns the selected value, or `null` when empty. `resetCursor()` selects the top value again.
+After a push, the cursor sits immediately before the newest value (offset `-1`), so the first `previous()` selects the latest pushed value. Calling `previous()` then moves toward older values, and `next()` moves back toward newer values; either returns `null` when there is no value in that direction. `getCursorValue()` returns the selected value, or `null` when no value is selected. `resetCursor()` returns the cursor to immediately before the newest value, ready for a new history-navigation sequence.
 
 ```java
 import dev.tim9h.collections.LimitedIterableStack;
@@ -17,7 +17,7 @@ history.push("second");
 history.push("third");
 history.push("fourth"); // "first" is discarded
 
-var top = history.peek();       // "fourth"
+var top = history.previous();   // "fourth"
 var older = history.previous(); // "third"
 ```
 

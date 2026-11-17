@@ -11,6 +11,20 @@ import org.junit.jupiter.api.Test;
 class LimitedIterableStackTest {
 
 	@Test
+	void testPreviousAfterPushReturnsLatestValue() {
+		var stack = new LimitedIterableStack<Integer>(3);
+		stack.push(1);
+		stack.push(2);
+		stack.push(3);
+
+		assertEquals(-1, stack.getCursor());
+		assertEquals(3, stack.previous());
+		assertEquals(0, stack.getCursor());
+		assertEquals(2, stack.previous());
+		assertEquals(1, stack.previous());
+	}
+
+	@Test
 	void testCapacity() {
 		var capacity = 5;
 		var stack = new LimitedIterableStack<Integer>(capacity);
@@ -68,6 +82,8 @@ class LimitedIterableStackTest {
 		for (var i = 0; i < 3; i++) {
 			stack.push(i);
 		}
+		assertEquals(-1, stack.getCursor());
+		assertEquals(2, stack.previous());
 		assertEquals(0, stack.getCursor());
 		assertEquals(1, stack.previous());
 		assertEquals(1, stack.getCursor());
@@ -85,12 +101,14 @@ class LimitedIterableStackTest {
 		for (var i = 0; i < 3; i++) {
 			stack.push(i);
 		}
-		assertEquals(0, stack.getCursor());
+		assertEquals(-1, stack.getCursor());
 		assertNull(stack.next());
-		assertEquals(0, stack.getCursor());
-		stack.previous();
+		assertEquals(-1, stack.getCursor());
+		assertEquals(2, stack.previous());
+		assertEquals(1, stack.previous());
 		assertEquals(2, stack.next());
 		assertEquals(0, stack.getCursor());
+		assertNull(stack.next());
 		stack.setCapacity(0);
 		assertNull(stack.next());
 	}
@@ -103,12 +121,12 @@ class LimitedIterableStackTest {
 		}
 		stack.previous();
 		stack.previous();
-		assertEquals(2, stack.getCursor());
-		assertEquals(2, stack.getCursorValue());
+		assertEquals(1, stack.getCursor());
+		assertEquals(3, stack.getCursorValue());
 		stack.setCapacity(4);
-		assertEquals(2, stack.getCursorValue());
+		assertEquals(3, stack.getCursorValue());
 		stack.setCapacity(3);
-		assertEquals(2, stack.getCursorValue());
+		assertEquals(3, stack.getCursorValue());
 	}
 
 	@Test
@@ -120,7 +138,8 @@ class LimitedIterableStackTest {
 		stack.previous();
 		stack.previous();
 		stack.resetCursor();
-		assertEquals(0, stack.getCursor());
+		assertEquals(-1, stack.getCursor());
+		assertEquals(4, stack.previous());
 	}
 
 	@Test
@@ -147,6 +166,7 @@ class LimitedIterableStackTest {
 		stack.push(1);
 		stack.push(2);
 		stack.push(3);
+		assertEquals(3, stack.previous());
 		assertEquals(3, stack.getCursorValue());
 		assertEquals(2, stack.previous());
 		assertEquals(2, stack.getCursorValue());
@@ -174,7 +194,7 @@ class LimitedIterableStackTest {
 	void testNullValuesAndEquality() {
 		var stack = new LimitedIterableStack<String>(2);
 		stack.push(null);
-		assertEquals("[(null)]", stack.toString());
+		assertEquals("[null]", stack.toString());
 		var equalStack = new LimitedIterableStack<String>(2);
 		equalStack.push(null);
 		assertEquals(stack, equalStack);

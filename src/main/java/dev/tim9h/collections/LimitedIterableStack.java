@@ -25,7 +25,7 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 			elements.removeFirst();
 		}
 		elements.add(value);
-		cursor = 0;
+		cursor = -1;
 	}
 
 	public T pop() {
@@ -36,7 +36,8 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 		if (cursor > 0 && !elements.isEmpty()) {
 			cursor--;
 		}
-		cursor = Math.clamp(cursor, 0, Math.max(0, elements.size() - 1));
+		cursor = elements.isEmpty() ? 0 : Math.clamp(cursor, -1, elements.size() - 1);
+
 		return value;
 	}
 
@@ -53,7 +54,7 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 	}
 
 	public T next() {
-		if (cursor == 0) {
+		if (cursor <= 0) {
 			return null;
 		}
 		cursor--;
@@ -69,10 +70,11 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 		if (this.capacity < elements.size()) {
 			var excess = elements.size() - this.capacity;
 			elements.subList(0, excess).clear();
-			cursor = Math.clamp(cursor, 0, Math.max(0, elements.size() - 1));
+			cursor = elements.isEmpty() ? 0 : Math.clamp(cursor, -1, elements.size() - 1);
 		}
 	}
 
+	@Override
 	public String toString() {
 		if (elements.isEmpty()) {
 			return "[empty]";
@@ -83,7 +85,7 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 				result.append(", ");
 			}
 			var value = String.valueOf(elements.get(index));
-			if (index == elements.size() - 1 - cursor) {
+			if (cursor >= 0 && index == elements.size() - 1 - cursor) {
 				result.append('(').append(value).append(')');
 			} else {
 				result.append(value);
@@ -92,10 +94,12 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 		return result.append(']').toString();
 	}
 
+	@Override
 	public int hashCode() {
 		return Objects.hash(elements, capacity, cursor);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return this == obj || obj instanceof LimitedIterableStack<?> other && capacity == other.capacity
 				&& cursor == other.cursor && elements.equals(other.elements);
@@ -136,14 +140,15 @@ public class LimitedIterableStack<T> implements Iterable<T> {
 	}
 
 	public T getCursorValue() {
-		if (elements.isEmpty()) {
+		if (elements.isEmpty() || cursor < 0) {
 			return null;
 		}
+
 		return elements.get(elements.size() - 1 - cursor);
 	}
 
 	public void resetCursor() {
-		cursor = 0;
+		cursor = elements.isEmpty() ? 0 : -1;
 	}
 
 }
